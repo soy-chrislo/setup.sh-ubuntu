@@ -4,7 +4,7 @@ sudo apt-get -y update
 sudo apt-get -y upgrade
 
 sudo snap install -y postman
-sudo apt install -y neovim timeshift  
+sudo apt install -y neovim timeshift git
 
 
 # Docker
@@ -53,23 +53,18 @@ sudo apt install code
 
 
 # Java
-sudo gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/oracle-jdk11-installer.gpg --keyserver keyserver.ubuntu.com --recv-keys EA8CACC073C3DB2A
-
 sudo apt update
+sudo apt install -y openjdk-8-jdk
+sudo update-alternatives --config java
 
-sudo mkdir -p /var/cache/oracle-jdk11-installer-local/
-sudo cp jdk-11.0.13_linux-x64_bin.tar.gz /var/cache/oracle-jdk11-installer-local/
-sudo apt install -y oracle-java11-installer-local
-sudo echo "JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"" >> /etc/environment
-source /etc/environment
-# echo $JAVA_HOME
+echo $JAVA_HOME
 
 # Discord
 
 sudo apt update
 sudo apt install gdebi-core wget
 wget -O ~/discord.deb "https://discordapp.com/api/download?platform=linux&format=deb"
-sudo gdebi -y ~/discord.deb 
+sudo gdebi ~/discord.deb 
 
 # RunJS
 wget https://github.com/lukehaas/RunJS/releases/download/v2.7.4/RunJS-2.7.4.AppImage
@@ -78,8 +73,34 @@ sudo chmod u+x RunJS-2.7.4.AppImage
 
 # NodeJS
 curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - &&\
-sudo apt-get install -y nodejs npm
+sudo apt install -y nodejs npm 
+sudo npm install -g pnpm
+#corepack enable
+#corepack prepare pnpm@latest --active
 sudo pnpm install -g nodemon serve
 
 
 # SSH
+ssh-keygen -t ed25519 -C "green13-16l@hotmail.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub
+
+
+# Battery Treshold
+sudo touch /etc/systemd/system/battery-charge-threshold.service
+sudo echo "[Unit]" > /etc/systemd/system/battery-charge-threshold.service
+sudo echo "Description=Set the battery charge threshold" >> /etc/systemd/system/battery-charge-threshold.service
+sudo echo "After=multi-user.target" >> /etc/systemd/system/battery-charge-threshold.service
+
+sudo echo "StartLimitBurst=0" >> /etc/systemd/system/battery-charge-threshold.service
+sudo echo "[Service]" >> /etc/systemd/system/battery-charge-threshold.service
+sudo echo "Type=oneshot" >> /etc/systemd/system/battery-charge-threshold.servicesudo echo "Restart=on-failure" >> /etc/systemd/system/battery-charge-threshold.service
+
+sudo echo "ExecStart=/bin/bash -c 'echo 60 > /sys/class/power_supply/BAT0/charge_control_end_threshold'" >> /etc/systemd/system/battery-charge-threshold.service
+source /etc/environment
+sudo echo "[Install]" >> /etc/systemd/system/battery-charge-threshold.service
+sudo echo "WantedBy=multi-user.target" >> /etc/systemd/system/battery-charge-threshold.service
+
+sudo systemctl enable battery-charge-threshold.service
+sudo systemctl start battery-charge-threshold.service
