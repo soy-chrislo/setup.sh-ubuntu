@@ -4,7 +4,7 @@ sudo apt-get -y update
 sudo apt-get -y upgrade
 
 sudo snap install -y postman
-sudo apt install -y neovim timeshift git
+sudo apt install -y neovim timeshift git neofetch
 
 
 # Docker
